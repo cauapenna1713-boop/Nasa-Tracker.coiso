@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nasa Tracker | Explore the Cosmos</title>
+    <meta name="description" content="Track NASA missions, news, and launches in real-time with a modern, responsive dashboard.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar glass-nav">
+        <div class="container nav-container">
+            <a href="#" class="logo">
+                <i data-lucide="rocket"></i>
+                NASA Tracker
+            </a>
+            
+            <div class="nav-links">
+                <a href="#hero" class="nav-link active" data-i18n="nav_home">Home</a>
+                <a href="#news" class="nav-link" data-i18n="nav_news">News</a>
+                <a href="#launches" class="nav-link" data-i18n="nav_launches">Launches</a>
+                <a href="#discoveries" class="nav-link" data-i18n="nav_discoveries">Discoveries</a>
+            </div>
+            
+            <div class="nav-actions">
+                <div class="lang-toggle glass" style="display: inline-flex; overflow: hidden; margin-right: 1rem;">
+                    <button class="lang-btn" data-lang="pt" onclick="I18N.setLanguage('pt')">PT</button>
+                    <button class="lang-btn" data-lang="en" onclick="I18N.setLanguage('en')">EN</button>
+                </div>
+                <button id="notification-btn" class="glass" title="Enable Notifications" style="padding: 0.5rem; background: none; color: white;">
+                    <i data-lucide="bell"></i>
+                </button>
+                <div class="search-container glass" style="display: inline-flex; align-items: center; padding: 0.5rem 1rem; margin-left: 1rem;">
+                    <i data-lucide="search" style="width: 18px; color: var(--text-muted);"></i>
+                    <input type="text" id="search-input" data-i18n="placeholder_search" placeholder="Search the cosmos..." style="background: none; border: none; color: white; margin-left: 0.5rem; outline: none;">
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <!-- APOD Hero Section -->
+        <section id="hero" class="hero">
+            <div class="hero-background" id="hero-bg"></div>
+            <div class="hero-content reveal">
+                <span class="card-label" id="hero-label" data-i18n="hero_label">Astronomy Picture of the Day</span>
+                <h1 class="hero-title" id="hero-title">Loading the Cosmos...</h1>
+                <p id="hero-desc" style="margin-bottom: 2rem; color: var(--text-muted);"></p>
+                <a href="#news" class="glass" style="padding: 1rem 2rem; color: white; text-decoration: none; display: inline-block; transition: 0.3s;" data-i18n="hero_cta">
+                    Explore Latest News <i data-lucide="arrow-down" style="display: inline; vertical-align: middle; width: 18px;"></i>
+                </a>
+            </div>
+        </section>
+
+        <div class="container">
+            <!-- Live Missions Section -->
+            <section id="live" style="margin-bottom: 4rem;">
+                <h2 style="margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem; color: #00ff88;">
+                    <i data-lucide="radio" class="pulse"></i> <span data-i18n="section_live">Live Missions & Telemetry</span>
+                </h2>
+                <div id="live-container" class="section-grid" style="grid-template-columns: 1fr;">
+                    <!-- Live telemetry dashboard will be injected here -->
+                </div>
+                
+                <!-- Artemis Tracker Sub-section -->
+                <div id="artemis-container" class="section-grid" style="margin-top: 2rem;">
+                    <!-- Artemis specific launches will be injected here -->
+                </div>
+            </section>
+
+            <!-- News Section -->
+            <section id="news">
+                <h2 style="margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="newspaper"></i> <span data-i18n="section_news">Latest NASA News</span>
+                </h2>
+                <div id="news-grid" class="section-grid">
+                    <!-- News cards will be injected here -->
+                </div>
+            </section>
+
+            <!-- Launches Section -->
+            <section id="launches" style="margin-top: 4rem;">
+                <h2 style="margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="rocket"></i> <span data-i18n="section_launches">NASA Missions</span>
+                </h2>
+                <div id="launches-grid" class="section-grid">
+                    <!-- Launch cards will be injected here -->
+                </div>
+            </section>
+
+            <!-- Discoveries Section -->
+            <section id="discoveries" style="margin-top: 4rem; padding-bottom: 4rem;">
+                <h2 style="margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="microscope"></i> <span data-i18n="section_discoveries">Scientific Discoveries</span>
+                </h2>
+                <div id="discoveries-grid" class="section-grid">
+                    <!-- Discovery cards will be injected here -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer style="padding: 4rem 0; border-top: 1px solid var(--glass-border); text-align: center; color: var(--text-muted);">
+        <p data-i18n="footer_text">© 2026 NASA Tracker. Powered by NASA and The Space Devs APIs.</p>
+    </footer>
+
+    <!-- Main Application Logic -->
+    <script src="js/i18n.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        // Initialize Language
+        I18N.updateUI();
+    </script>
+</body>
+</html>
+
