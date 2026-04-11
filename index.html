@@ -9,12 +9,321 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@700;800&family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <link rel="stylesheet" href="style.css">
+
+    <!-- LANG WHEEL STYLES -->
+    <style>
+    /* ============================================================
+       LANG WHEEL — Globe Button & Language Selector Overlay
+    ============================================================ */
+
+    /* Globe trigger button */
+    #lang-globe-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        background: rgba(188, 0, 255, 0.08);
+        border: 1px solid rgba(188, 0, 255, 0.35);
+        border-radius: 2rem;
+        color: #e0d0ff;
+        font-family: var(--font-body);
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-right: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+    #lang-globe-btn::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 50% 0%, rgba(188,0,255,0.18), transparent 70%);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    #lang-globe-btn:hover {
+        border-color: #bc00ff;
+        color: #fff;
+        box-shadow: 0 0 16px rgba(188, 0, 255, 0.45), 0 0 4px rgba(188, 0, 255, 0.2) inset;
+        transform: translateY(-1px);
+    }
+    #lang-globe-btn:hover::before { opacity: 1; }
+    #lang-globe-btn svg {
+        width: 15px;
+        height: 15px;
+        flex-shrink: 0;
+        filter: drop-shadow(0 0 4px rgba(188,0,255,0.6));
+    }
+    #lang-globe-btn .globe-code {
+        min-width: 22px;
+        text-align: center;
+    }
+
+    /* ── Overlay ─────────────────────────────────────────────── */
+    #lang-wheel-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        background: rgba(4, 4, 16, 0.72);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    #lang-wheel-overlay.open {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    /* ── Panel ───────────────────────────────────────────────── */
+    #lang-wheel-panel {
+        background: rgba(10, 8, 28, 0.88);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 1.5rem;
+        padding: 2rem 2.5rem 1.75rem;
+        width: min(420px, 92vw);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.4rem;
+        transform: translateY(28px) scale(0.97);
+        transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow:
+            0 0 0 1px rgba(188,0,255,0.08),
+            0 24px 64px rgba(0,0,0,0.7),
+            0 0 60px rgba(188,0,255,0.08) inset;
+        user-select: none;
+    }
+    #lang-wheel-overlay.open #lang-wheel-panel {
+        transform: translateY(0) scale(1);
+    }
+
+    /* ── Panel header ────────────────────────────────────────── */
+    .lw-header {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .lw-title {
+        font-family: var(--font-heading);
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #e8d8ff;
+        letter-spacing: -0.01em;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .lw-title svg { width: 18px; height: 18px; color: #bc00ff; }
+    .lw-close {
+        background: none;
+        border: none;
+        color: rgba(255,255,255,0.4);
+        cursor: pointer;
+        padding: 0.3rem;
+        border-radius: 0.5rem;
+        transition: color 0.2s, background 0.2s;
+        display: flex;
+        align-items: center;
+    }
+    .lw-close:hover { color: #fff; background: rgba(255,255,255,0.07); }
+    .lw-close svg { width: 18px; height: 18px; }
+
+    /* ── Wheel viewport ──────────────────────────────────────── */
+    .lw-wheel-wrap {
+        position: relative;
+        width: 100%;
+        height: 260px;
+        overflow: hidden;
+        cursor: grab;
+    }
+    .lw-wheel-wrap:active { cursor: grabbing; }
+
+    /* Fade-out masks top/bottom */
+    .lw-wheel-wrap::before,
+    .lw-wheel-wrap::after {
+        content: '';
+        position: absolute;
+        left: 0; right: 0;
+        height: 80px;
+        z-index: 2;
+        pointer-events: none;
+    }
+    .lw-wheel-wrap::before {
+        top: 0;
+        background: linear-gradient(to bottom,
+            rgba(10,8,28,0.95) 0%,
+            transparent 100%);
+    }
+    .lw-wheel-wrap::after {
+        bottom: 0;
+        background: linear-gradient(to top,
+            rgba(10,8,28,0.95) 0%,
+            transparent 100%);
+    }
+
+    /* Centre selection marker */
+    .lw-marker {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: calc(100% - 2rem);
+        height: 52px;
+        border-top: 1px solid rgba(188,0,255,0.45);
+        border-bottom: 1px solid rgba(188,0,255,0.45);
+        border-radius: 0.6rem;
+        background: rgba(188,0,255,0.05);
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    /* Scroll list */
+    .lw-list {
+        position: absolute;
+        left: 0; right: 0;
+        top: 0;
+        will-change: transform;
+        transition: transform 0.22s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    /* Individual language item */
+    .lw-item {
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        font-size: 1rem;
+        font-weight: 500;
+        color: rgba(200,185,240,0.4);
+        transition:
+            color 0.22s,
+            font-size 0.22s,
+            font-weight 0.22s,
+            opacity 0.22s,
+            text-shadow 0.22s,
+            transform 0.22s cubic-bezier(0.23, 1, 0.32, 1);
+        transform-style: preserve-3d;
+        transform-origin: center center;
+        cursor: pointer;
+    }
+    .lw-item .lw-flag {
+        font-size: 1.35em;
+        line-height: 1;
+    }
+    .lw-item .lw-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 200px;
+    }
+
+    /* Active (center) item */
+    .lw-item.lw-active {
+        color: #fff;
+        font-size: 1.15rem;
+        font-weight: 700;
+        text-shadow:
+            0 0 18px rgba(188, 0, 255, 0.9),
+            0 0 40px rgba(0, 255, 136, 0.35);
+        filter: drop-shadow(0 0 6px rgba(188,0,255,0.7));
+    }
+
+    /* Adjacent rows, scaled by distance */
+    .lw-item[data-dist="1"] {
+        color: rgba(210,195,248,0.72);
+        transform: perspective(300px) rotateX(16deg) scaleY(0.93);
+        font-size: 0.97rem;
+    }
+    .lw-item[data-dist="-1"] {
+        color: rgba(210,195,248,0.72);
+        transform: perspective(300px) rotateX(-16deg) scaleY(0.93);
+        font-size: 0.97rem;
+    }
+    .lw-item[data-dist="2"],
+    .lw-item[data-dist="-2"] {
+        color: rgba(180,165,218,0.42);
+        transform: perspective(300px) rotateX(28deg) scaleY(0.82);
+        font-size: 0.88rem;
+    }
+    .lw-item[data-dist="-2"] {
+        transform: perspective(300px) rotateX(-28deg) scaleY(0.82);
+    }
+    .lw-item[data-dist="3"],
+    .lw-item[data-dist="-3"],
+    .lw-item[data-dist="4"],
+    .lw-item[data-dist="-4"],
+    .lw-item[data-dist="5"],
+    .lw-item[data-dist="-5"] {
+        color: rgba(150,130,190,0.2);
+        transform: perspective(300px) rotateX(38deg) scaleY(0.7);
+        font-size: 0.82rem;
+    }
+    .lw-item[data-dist="-3"],
+    .lw-item[data-dist="-4"],
+    .lw-item[data-dist="-5"] {
+        transform: perspective(300px) rotateX(-38deg) scaleY(0.7);
+    }
+
+    /* ── Apply button ────────────────────────────────────────── */
+    .lw-apply {
+        width: 100%;
+        padding: 0.85rem 1.5rem;
+        background: linear-gradient(135deg, #bc00ff 0%, #7000cc 100%);
+        border: none;
+        border-radius: 0.85rem;
+        color: #fff;
+        font-family: var(--font-body);
+        font-size: 0.95rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+        box-shadow: 0 4px 24px rgba(188,0,255,0.35);
+        position: relative;
+        overflow: hidden;
+    }
+    .lw-apply::before {
+        content: '';
+        position: absolute;
+        top: -50%; left: -50%;
+        width: 200%; height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+        transform: scale(0);
+        transition: transform 0.5s;
+    }
+    .lw-apply:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 32px rgba(188,0,255,0.55);
+    }
+    .lw-apply:hover::before { transform: scale(1); }
+    .lw-apply:active { transform: translateY(0); }
+
+    /* ── Preview badge ───────────────────────────────────────── */
+    .lw-preview {
+        font-size: 0.78rem;
+        color: rgba(200,185,240,0.5);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        height: 1.2em;
+        transition: color 0.2s;
+    }
+    </style>
 </head>
 <body>
     <nav class="navbar glass-nav">
@@ -28,18 +337,24 @@
                 <a href="#hero" class="nav-link active" data-i18n="nav_home">Home</a>
                 <a href="#news" class="nav-link" data-i18n="nav_news">News</a>
                 <a href="#launches" class="nav-link" data-i18n="nav_launches">Launches</a>
+                <a href="#satellites" class="nav-link" data-i18n="nav_satellites">Satellites</a>
                 <a href="#discoveries" class="nav-link" data-i18n="nav_discoveries">Discoveries</a>
+                <a href="#simulator" class="nav-link" data-i18n="nav_simulator">Simulator</a>
             </div>
             
             <div class="nav-actions">
-                <div class="lang-toggle glass" style="display: inline-flex; overflow: hidden; margin-right: 1rem;">
-                    <button class="lang-btn" data-lang="pt" onclick="I18N.setLanguage('pt')">PT</button>
-                    <button class="lang-btn" data-lang="en" onclick="I18N.setLanguage('en')">EN</button>
-                </div>
+                <!-- LANG WHEEL — Globe trigger button (replaces old PT/EN toggle) -->
+                <button id="lang-globe-btn" aria-label="Select language" title="Select language">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    <span class="globe-code">EN</span>
+                </button>
+                <button id="random-article-btn" class="glass" title="Random Article" style="padding: 0.5rem 1rem; color: #00ff88; display: inline-flex; align-items: center; gap: 0.5rem; border-color: #00ff88; background: rgba(0, 255, 136, 0.1); cursor: pointer; transition: 0.3s;">
+                    <i data-lucide="dices" style="width: 18px;"></i> <span data-i18n="nav_random" style="font-weight: 600;">Random Article</span>
+                </button>
                 <button id="notification-btn" class="glass" title="Enable Notifications" style="padding: 0.5rem; background: none; color: white;">
                     <i data-lucide="bell"></i>
                 </button>
-                <div class="search-container glass" style="display: inline-flex; align-items: center; padding: 0.5rem 1rem; margin-left: 1rem;">
+                <div class="search-container glass" style="display: inline-flex; align-items: center; padding: 0.5rem 1rem;">
                     <i data-lucide="search" style="width: 18px; color: var(--text-muted);"></i>
                     <input type="text" id="search-input" data-i18n="placeholder_search" placeholder="Search the cosmos..." style="background: none; border: none; color: white; margin-left: 0.5rem; outline: none;">
                 </div>
@@ -70,11 +385,6 @@
                 <div id="live-container" class="section-grid" style="grid-template-columns: 1fr;">
                     <!-- Live telemetry dashboard will be injected here -->
                 </div>
-                
-                <!-- Artemis Tracker Sub-section -->
-                <div id="artemis-container" class="section-grid" style="margin-top: 2rem;">
-                    <!-- Artemis specific launches will be injected here -->
-                </div>
             </section>
 
             <!-- News Section -->
@@ -97,6 +407,16 @@
                 </div>
             </section>
 
+            <!-- Satellites Section -->
+            <section id="satellites" style="margin-top: 4rem;">
+                <h2 style="margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem; color: #bc00ff;">
+                    <i data-lucide="satellite"></i> <span data-i18n="section_satellites">NASA Satellites in Orbit</span>
+                </h2>
+                <div id="satellites-grid" class="section-grid">
+                    <!-- Satellite cards will be injected here -->
+                </div>
+            </section>
+
             <!-- Discoveries Section -->
             <section id="discoveries" style="margin-top: 4rem; padding-bottom: 4rem;">
                 <h2 style="margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem;">
@@ -106,6 +426,119 @@
                     <!-- Discovery cards will be injected here -->
                 </div>
             </section>
+
+            <!-- Simulator Section -->
+            <section id="simulator" style="margin-top: 4rem; padding-bottom: 4rem;">
+                <h2 style="margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem; color: var(--accent-primary);">
+                    <i data-lucide="telescope"></i> <span data-i18n="nav_simulator">Newton's Cannon Simulator</span>
+                </h2>
+                
+                <div class="simulator-layout">
+                    <!-- Left Panel -->
+                    <div class="glass simulator-panel">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Planet</h3>
+                        <div id="planet-pills" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+                            <!-- Pills generated by JS -->
+                        </div>
+                        
+                        <div id="custom-planet-panel" class="glass" style="display: none; padding: 1rem; flex-direction: column; gap: 0.8rem; margin-bottom: 1rem;">
+                            <div>
+                                <label style="display: flex; justify-content: space-between; font-size: 0.8rem;"><span>Gravity</span><span id="lbl-grav">9.8</span></label>
+                                <input type="range" class="sim-range" id="sim-gravity" min="0.1" max="100" step="0.1" value="9.8">
+                            </div>
+                            <div>
+                                <label style="display: flex; justify-content: space-between; font-size: 0.8rem;"><span>Radius</span><span id="lbl-rad">6371</span></label>
+                                <input type="range" class="sim-range" id="sim-radius" min="500" max="100000" step="100" value="6371">
+                            </div>
+                            <div>
+                                <label style="display: flex; justify-content: space-between; font-size: 0.8rem;"><span>Atmo Height</span><span id="lbl-atmoh">100</span></label>
+                                <input type="range" class="sim-range" id="sim-atmoh" min="0" max="2000" step="5" value="100">
+                            </div>
+                            <div>
+                                <label style="display: flex; justify-content: space-between; font-size: 0.8rem;"><span>Atmo Density</span><span id="lbl-atmod">0.5</span></label>
+                                <input type="range" class="sim-range" id="sim-atmod" min="0" max="1" step="0.01" value="0.5">
+                            </div>
+                            <div>
+                                <label style="display: flex; justify-content: space-between; font-size: 0.8rem;"><span>Mountain Height</span><span id="lbl-mount">10</span></label>
+                                <input type="range" class="sim-range" id="sim-mount" min="0" max="100" step="1" value="10">
+                            </div>
+                        </div>
+
+                        <div class="glass telemetry-panel">
+                            <div class="telemetry-grid">
+                                <div><span class="t-label">Status</span><br><span id="sim-status" class="t-badge ready">READY</span></div>
+                                <div><span class="t-label">Speed</span><br><span id="sim-vel" class="t-val">0.00</span> <span class="t-unit">km/s</span></div>
+                                <div><span class="t-label">Altitude</span><br><span id="sim-alt" class="t-val">0</span> <span class="t-unit">km</span></div>
+                                <div><span class="t-label">Drag</span><br><span id="sim-drag" class="t-val">0.00</span> <span class="t-unit">%</span></div>
+                                <div><span class="t-label">H-Vel</span><br><span id="sim-vhor" class="t-val">0.00</span> <span class="t-unit">km/s</span></div>
+                                <div><span class="t-label">V-Vel</span><br><span id="sim-vver" class="t-val">0.00</span> <span class="t-unit">km/s</span></div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+                            <div>
+                                <label style="display: flex; justify-content: space-between; font-size: 0.9rem;"><span>Initial Speed (km/s)</span><span id="lbl-speed">7.9</span></label>
+                                <input type="range" class="sim-range" id="sim-speed" min="0" max="150" step="0.1" value="7.9">
+                            </div>
+                            <div>
+                                <label style="display: flex; justify-content: space-between; font-size: 0.9rem;"><span>Angle (deg)</span><span id="lbl-angle">0</span></label>
+                                <input type="range" class="sim-range" id="sim-angle" min="-45" max="45" step="1" value="0">
+                            </div>
+                            <button id="sim-fire" class="btn btn-primary" style="width: 100%; font-size: 1.1rem; padding: 1rem; border-radius: 0.8rem;">FIRE! 🚀</button>
+                            
+                            <div class="warp-controls">
+                                <span style="font-size:0.85rem; color:var(--text-muted); font-weight: 600;">Time Warp:</span>
+                                <button class="btn-glass warp-btn active" data-warp="1">1x</button>
+                                <button class="btn-glass warp-btn" data-warp="10">10x</button>
+                                <button class="btn-glass warp-btn" data-warp="50">50x</button>
+                                <button class="btn-glass warp-btn" data-warp="100">100x</button>
+                            </div>
+                        </div>
+
+                        <div id="sim-planet-info" class="glass" style="margin-top: 1rem; padding: 1rem; font-size: 0.85rem; color: var(--text-muted);">
+                            <!-- Planet description -->
+                        </div>
+                    </div>
+
+                    <!-- Canvas -->
+                    <div class="glass canvas-container">
+                        <canvas id="cannon-canvas"></canvas>
+                        
+                        <div id="orbit-badge" class="orbit-badge hide">
+                            🛸 <span>ORBIT ACHIEVED</span>
+                        </div>
+                        
+                        <button id="btn-camera-lock" class="glass btn-lock" title="Toggle Ship Lock (L)">
+                            <i data-lucide="lock" style="width: 16px;"></i> <span id="lbl-lock">UNLOCK</span>
+                        </button>
+
+                        <div id="sim-modal" class="glass sim-modal hide">
+                            <div class="modal-content">
+                                <div id="modal-icon" style="font-size: 3rem; margin-bottom: 0.5rem;">💥</div>
+                                <h2 id="modal-title" style="margin-bottom: 1rem; font-family: var(--font-heading);">IMPACT</h2>
+                                <div id="modal-stats" style="text-align: left; font-size: 0.9rem; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; font-family: 'Orbitron', monospace;">
+                                    <div><span style="color:var(--text-muted)">Max Altitude:</span> <span id="m-alt">0</span> km</div>
+                                    <div><span style="color:var(--text-muted)">Flight Time:</span> <span id="m-time">0</span> s</div>
+                                    <div><span style="color:var(--text-muted)">Max Speed:</span> <span id="m-spd">0</span> km/s</div>
+                                    <div id="m-comp" style="margin-top: 0.5rem; font-style: italic; color: var(--accent-primary); font-family: var(--font-body); font-size: 0.8rem;"></div>
+                                </div>
+                                <div style="display: flex; gap: 1rem; justify-content: center;">
+                                    <button id="modal-retry" class="btn btn-primary">Try Again</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Achievements toast container -->
+                        <div id="achievement-toast" class="glass achievement-toast hide">
+                            <div class="achievement-icon">🏆</div>
+                            <div class="achievement-text">
+                                <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Achievement Unlocked</div>
+                                <div id="achievement-title" style="font-size:1rem; font-weight:600; color:var(--accent-primary);">Title</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
 
@@ -113,17 +546,299 @@
         <p data-i18n="footer_text">© 2026 NASA Tracker. Powered by NASA and The Space Devs APIs.</p>
     </footer>
 
+    <!-- LANG WHEEL — Overlay HTML -->
+    <div id="lang-wheel-overlay" role="dialog" aria-modal="true" aria-label="Language selector">
+        <div id="lang-wheel-panel">
+            <!-- Header -->
+            <div class="lw-header">
+                <span class="lw-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    Select Language
+                </span>
+                <button class="lw-close" id="lang-wheel-close" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+
+            <!-- Wheel viewport -->
+            <div class="lw-wheel-wrap" id="lw-wheel-wrap">
+                <div class="lw-marker"></div>
+                <div class="lw-list" id="lw-list"></div>
+            </div>
+
+            <!-- Preview text -->
+            <div class="lw-preview" id="lw-preview"></div>
+
+            <!-- Apply button -->
+            <button class="lw-apply" id="lw-apply">✦ Apply Language</button>
+        </div>
+    </div>
+
     <!-- Main Application Logic -->
     <script src="js/i18n.js"></script>
     <script src="js/api.js"></script>
     <script src="js/notifications.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/cannon.js"></script>
     <script src="app.js"></script>
     <script>
         // Initialize Lucide icons
         lucide.createIcons();
         // Initialize Language
         I18N.updateUI();
+    </script>
+
+    <!-- LANG WHEEL — Component Script -->
+    <script>
+    /* ============================================================
+       LANG WHEEL  —  Suno-style vertical scroll wheel
+       Storage key: 'lang'  (matches js/i18n.js)
+    ============================================================ */
+    (function () {
+        'use strict';
+
+        /* ── Language data ─────────────────────────────────────── */
+        const LANGUAGES = [
+            { code: 'pt',    flag: '🇧🇷', name: 'Português (BR)',    display: 'PT',  rtl: false },
+            { code: 'pt-PT', flag: '🇵🇹', name: 'Português (PT)',    display: 'PT',  rtl: false },
+            { code: 'en',    flag: '🇺🇸', name: 'English',           display: 'EN',  rtl: false },
+            { code: 'es',    flag: '🇪🇸', name: 'Español',           display: 'ES',  rtl: false },
+            { code: 'es-AR', flag: '🇦🇷', name: 'Español (AR)',      display: 'ES',  rtl: false },
+            { code: 'es-MX', flag: '🇲🇽', name: 'Español (MX)',      display: 'ES',  rtl: false },
+            { code: 'fr',    flag: '🇫🇷', name: 'Français',          display: 'FR',  rtl: false },
+            { code: 'de',    flag: '🇩🇪', name: 'Deutsch',           display: 'DE',  rtl: false },
+            { code: 'it',    flag: '🇮🇹', name: 'Italiano',          display: 'IT',  rtl: false },
+            { code: 'ja',    flag: '🇯🇵', name: '日本語',             display: 'JA',  rtl: false },
+            { code: 'ko',    flag: '🇰🇷', name: '한국어',             display: 'KO',  rtl: false },
+            { code: 'zh-CN', flag: '🇨🇳', name: '中文 (简体)',        display: 'ZH',  rtl: false },
+            { code: 'zh-TW', flag: '🇹🇼', name: '中文 (繁體)',        display: 'ZH',  rtl: false },
+            { code: 'ru',    flag: '🇷🇺', name: 'Русский',           display: 'RU',  rtl: false },
+            { code: 'ar',    flag: '🇸🇦', name: 'العربية',           display: 'AR',  rtl: true  },
+            { code: 'hi',    flag: '🇮🇳', name: 'हिन्दी',            display: 'HI',  rtl: false },
+            { code: 'tr',    flag: '🇹🇷', name: 'Türkçe',            display: 'TR',  rtl: false },
+            { code: 'nl',    flag: '🇳🇱', name: 'Nederlands',        display: 'NL',  rtl: false },
+            { code: 'sv',    flag: '🇸🇪', name: 'Svenska',           display: 'SV',  rtl: false },
+            { code: 'pl',    flag: '🇵🇱', name: 'Polski',            display: 'PL',  rtl: false },
+            { code: 'uk',    flag: '🇺🇦', name: 'Українська',        display: 'UK',  rtl: false },
+            { code: 'el',    flag: '🇬🇷', name: 'Ελληνικά',         display: 'EL',  rtl: false },
+            { code: 'cs',    flag: '🇨🇿', name: 'Čeština',           display: 'CS',  rtl: false },
+            { code: 'ro',    flag: '🇷🇴', name: 'Română',            display: 'RO',  rtl: false },
+            { code: 'id',    flag: '🇮🇩', name: 'Bahasa Indonesia',  display: 'ID',  rtl: false },
+            { code: 'th',    flag: '🇹🇭', name: 'ภาษาไทย',           display: 'TH',  rtl: false },
+            { code: 'vi',    flag: '🇻🇳', name: 'Tiếng Việt',        display: 'VI',  rtl: false },
+            { code: 'fi',    flag: '🇫🇮', name: 'Suomi',             display: 'FI',  rtl: false },
+            { code: 'da',    flag: '🇩🇰', name: 'Dansk',             display: 'DA',  rtl: false },
+            { code: 'no',    flag: '🇳🇴', name: 'Norsk',             display: 'NO',  rtl: false },
+            { code: 'hu',    flag: '🇭🇺', name: 'Magyar',            display: 'HU',  rtl: false },
+            { code: 'he',    flag: '🇮🇱', name: 'עברית',             display: 'HE',  rtl: true  },
+            { code: 'fil',   flag: '🇵🇭', name: 'Filipino',          display: 'FIL', rtl: false },
+        ];
+
+        const ITEM_H   = 52;   // px — must match CSS
+        const VIEWPORT = 260;  // px — must match CSS
+        const CENTER   = Math.floor(VIEWPORT / (ITEM_H * 2)) * ITEM_H; // offset to put item 0 in center
+        const LEN      = LANGUAGES.length;
+
+        /* ── DOM refs ───────────────────────────────────────────── */
+        const overlay   = document.getElementById('lang-wheel-overlay');
+        const panel     = document.getElementById('lang-wheel-panel');
+        const list      = document.getElementById('lw-list');
+        const wrap      = document.getElementById('lw-wheel-wrap');
+        const globeBtn  = document.getElementById('lang-globe-btn');
+        const globeCode = globeBtn.querySelector('.globe-code');
+        const closeBtn  = document.getElementById('lang-wheel-close');
+        const applyBtn  = document.getElementById('lw-apply');
+        const preview   = document.getElementById('lw-preview');
+
+        /* ── State ──────────────────────────────────────────────── */
+        let currentIdx  = 0;   // index into LANGUAGES
+        let selectedIdx = 0;   // confirmed language
+        let isOpen      = false;
+
+        /* ── Helpers ────────────────────────────────────────────── */
+        function mod(n, m) { return ((n % m) + m) % m; }
+
+        function idxFromCode(code) {
+            const i = LANGUAGES.findIndex(l => l.code === code);
+            return i >= 0 ? i : 2; // default to 'en'
+        }
+
+        /* ── Build list DOM (3 cloned loops for infinite feel) ──── */
+        function buildList() {
+            list.innerHTML = '';
+            // We render 3x the list to allow circular wrapping
+            for (let pass = 0; pass < 3; pass++) {
+                LANGUAGES.forEach((lang, localIdx) => {
+                    const el = document.createElement('div');
+                    el.className = 'lw-item';
+                    el.dataset.idx = localIdx;
+                    el.innerHTML = `<span class="lw-flag">${lang.flag}</span><span class="lw-name">${lang.name}</span>`;
+                    el.addEventListener('click', () => { goTo(localIdx); });
+                    list.appendChild(el);
+                });
+            }
+        }
+
+        /* ── Position list so currentIdx is centred ─────────────── */
+        function getTranslateY(idx) {
+            // center offset: half viewport minus half item height
+            const halfVP = VIEWPORT / 2;
+            const halfItem = ITEM_H / 2;
+            // Render starting at the second pass (pass=1) so we have room above/below
+            const baseY = LEN * ITEM_H; // offset for second pass
+            return halfVP - halfItem - baseY - idx * ITEM_H;
+        }
+
+        function applyTranslate(animated) {
+            if (!animated) {
+                list.style.transition = 'none';
+            } else {
+                list.style.transition = 'transform 0.22s cubic-bezier(0.23, 1, 0.32, 1)';
+            }
+            list.style.transform = `translateY(${getTranslateY(currentIdx)}px)`;
+            if (!animated) {
+                // Force reflow then re-enable transition
+                void list.offsetHeight;
+                list.style.transition = '';
+            }
+        }
+
+        /* ── Update visual states of each item ──────────────────── */
+        function updateItems() {
+            const items = list.querySelectorAll('.lw-item');
+            items.forEach((el) => {
+                const localIdx = parseInt(el.dataset.idx, 10);
+                const dist = localIdx - currentIdx;
+                el.classList.toggle('lw-active', dist === 0);
+                el.removeAttribute('data-dist');
+                if (dist !== 0) el.setAttribute('data-dist', dist);
+            });
+            // Update preview
+            const lang = LANGUAGES[mod(currentIdx, LEN)];
+            if (preview) preview.textContent = lang ? `${lang.flag}  ${lang.name}` : '';
+        }
+
+        /* ── Navigate to index ──────────────────────────────────── */
+        function goTo(idx, animated = true) {
+            currentIdx = mod(idx, LEN);
+            applyTranslate(animated);
+            updateItems();
+        }
+
+        /* ── Open / close ───────────────────────────────────────── */
+        function openWheel() {
+            if (isOpen) return;
+            isOpen = true;
+            // Reset to current confirmed language
+            currentIdx = selectedIdx;
+            buildList();
+            applyTranslate(false);
+            updateItems();
+            overlay.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeWheel() {
+            if (!isOpen) return;
+            isOpen = false;
+            overlay.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        /* ── Apply selected language ────────────────────────────── */
+        function applyLanguage() {
+            selectedIdx = mod(currentIdx, LEN);
+            const lang = LANGUAGES[selectedIdx];
+            globeCode.textContent = lang.display;
+            // RTL support
+            document.documentElement.dir = lang.rtl ? 'rtl' : 'ltr';
+            // Call i18n — only if the translation exists, else still save
+            if (typeof I18N !== 'undefined' && typeof I18N.setLanguage === 'function') {
+                I18N.setLanguage(lang.code);
+            } else {
+                localStorage.setItem('lang', lang.code);
+            }
+            closeWheel();
+        }
+
+        /* ── Mouse-wheel scroll (throttled ~120 ms) ─────────────── */
+        let wheelThrottle = false;
+        wrap.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (wheelThrottle) return;
+            wheelThrottle = true;
+            const dir = e.deltaY > 0 ? 1 : -1;
+            goTo(currentIdx + dir);
+            setTimeout(() => { wheelThrottle = false; }, 120);
+        }, { passive: false });
+
+        /* ── Drag / touch ───────────────────────────────────────── */
+        let dragStartY = null;
+        let dragStartIdx = null;
+
+        function onDragStart(y) {
+            dragStartY   = y;
+            dragStartIdx = currentIdx;
+            list.style.transition = 'none';
+        }
+        function onDragMove(y) {
+            if (dragStartY === null) return;
+            const dy   = y - dragStartY;
+            const delta = -Math.round(dy / ITEM_H);
+            const newIdx = mod(dragStartIdx + delta, LEN);
+            if (newIdx !== currentIdx) {
+                currentIdx = newIdx;
+                list.style.transform = `translateY(${getTranslateY(currentIdx)}px)`;
+                updateItems();
+            }
+        }
+        function onDragEnd() {
+            dragStartY   = null;
+            dragStartIdx = null;
+            list.style.transition = 'transform 0.22s cubic-bezier(0.23, 1, 0.32, 1)';
+            applyTranslate(true);
+        }
+
+        // Mouse drag
+        wrap.addEventListener('mousedown',  (e) => { onDragStart(e.clientY); });
+        window.addEventListener('mousemove', (e) => { if (dragStartY !== null) onDragMove(e.clientY); });
+        window.addEventListener('mouseup',   ()  => { onDragEnd(); });
+
+        // Touch drag
+        wrap.addEventListener('touchstart', (e) => { onDragStart(e.touches[0].clientY); }, { passive: true });
+        wrap.addEventListener('touchmove',  (e) => { onDragMove(e.touches[0].clientY); },  { passive: true });
+        wrap.addEventListener('touchend',   ()  => { onDragEnd(); });
+
+        /* ── Keyboard ───────────────────────────────────────────── */
+        document.addEventListener('keydown', (e) => {
+            if (!isOpen) return;
+            if (e.key === 'Escape') { closeWheel(); return; }
+            if (e.key === 'ArrowDown')  { e.preventDefault(); goTo(currentIdx + 1); }
+            if (e.key === 'ArrowUp')    { e.preventDefault(); goTo(currentIdx - 1); }
+            if (e.key === 'Enter')      { applyLanguage(); }
+        });
+
+        /* ── Backdrop click ─────────────────────────────────────── */
+        overlay.addEventListener('click', (e) => {
+            if (!panel.contains(e.target)) closeWheel();
+        });
+
+        /* ── Wire up buttons ────────────────────────────────────── */
+        globeBtn.addEventListener('click', openWheel);
+        closeBtn.addEventListener('click', closeWheel);
+        applyBtn.addEventListener('click', applyLanguage);
+
+        /* ── Init: restore saved language ───────────────────────── */
+        (function init() {
+            const saved = localStorage.getItem('lang') || 'en';
+            selectedIdx = idxFromCode(saved);
+            currentIdx  = selectedIdx;
+            const lang  = LANGUAGES[selectedIdx];
+            globeCode.textContent = lang ? lang.display : 'EN';
+            if (lang) document.documentElement.dir = lang.rtl ? 'rtl' : 'ltr';
+        })();
+
+    })();
     </script>
 </body>
 </html>

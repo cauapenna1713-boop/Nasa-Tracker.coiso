@@ -6,13 +6,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('NASA Tracker initializing...');
 
     // 1. Initial Data Fetch (Removed APOD)
-    const [news, launches, discoveries, activeMissions, issData, artemis] = await Promise.all([
+    const [news, launches, discoveries, activeMissions, issData, satellites] = await Promise.all([
         ApiService.getLatestNews(),
         ApiService.getUpcomingLaunches(),
         ApiService.getDiscoveries(),
         ApiService.getActiveMissions(),
         ApiService.getISSTelemetry(),
-        ApiService.getArtemisData()
+        ApiService.getNASASatellites()
     ]);
 
     // 2. Render UI
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     UI.renderGrid('news-grid', news, 'news');
     UI.renderGrid('launches-grid', launches, 'launch');
     UI.renderGrid('discoveries-grid', discoveries, 'discovery');
-    UI.renderGrid('artemis-container', artemis, 'artemis');
+    UI.renderGrid('satellites-grid', satellites, 'satellite');
     
     // Initial Live Dashboard Render - ONLY NASA for telemetry
     const liveNasaMissions = activeMissions.filter(m => 
@@ -49,17 +49,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 5. LIVE TELEMETRY LOOP (Every 5 seconds)
     setInterval(async () => {
-        const [activeMissions, issData, artemis] = await Promise.all([
+        const [activeMissions, issData] = await Promise.all([
             ApiService.getActiveMissions(),
-            ApiService.getISSTelemetry(),
-            ApiService.getArtemisData()
+            ApiService.getISSTelemetry()
         ]);
         const liveNasaMissions = activeMissions.filter(m => 
             m.launch_service_provider?.name.toLowerCase().includes('nasa') ||
             m.mission?.agencies?.some(a => a.name.toLowerCase().includes('nasa'))
         );
         UI.renderLiveDashboard('live-container', liveNasaMissions, issData);
-        UI.renderGrid('artemis-container', artemis, 'artemis');
     }, 5000);
 
     // 6. Search Functionality
@@ -68,7 +66,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         UI.filterUI(e.target.value);
     });
 
-    // 5. Scroll Animations (Simple Intersection Observer)
+    // 7. Random Article Functionality
+    const randomBtn = document.getElementById('random-article-btn');
+    if (randomBtn) {
+        randomBtn.addEventListener('click', async () => {
+            const icon = randomBtn.querySelector('i');
+            if (icon) icon.classList.add('pulse'); // Visual feedback
+            
+            const randomArticle = await ApiService.getRandomNews();
+            
+            if (icon) icon.classList.remove('pulse');
+            
+            if (randomArticle && randomArticle.url) {
+                window.open(randomArticle.url, '_blank');
+            } else {
+                alert('Could not find a random article at the moment.');
+            }
+        });
+    }
+
+    // 8. Scroll Animations (Simple Intersection Observer)
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {

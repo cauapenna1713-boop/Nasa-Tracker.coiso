@@ -43,17 +43,6 @@ A modern, responsive, and real-time dashboard for tracking NASA missions, univer
 3. **API Key (Optional)**:
    The project comes pre-configured with a demo key. For production use, replace the `CONFIG.NASA_KEY` in `js/api.js` with your own key from [api.nasa.gov](https://api.nasa.gov/).
 
-## 🔐 API Configuration
-This project uses official NASA APIs. To run it locally or host your own version:
-1. Obtain your free API key at [api.nasa.gov](https://api.nasa.gov/).
-2. Open the `js/api.js` file.
-3. Replace the `NASA_KEY` value with your personal key:
-   ```javascript
-   const CONFIG = {
-       NASA_KEY: 'YOUR_KEY_HERE',
-       ...
-   };
-   
 ## 📝 License
 
 This project is open-source and available under the MIT License.
