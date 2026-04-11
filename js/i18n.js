@@ -34,7 +34,12 @@ const I18N = {
             card_satellite_ig: 'Satellite Page (Instagram)',
             nav_random: 'Random Article',
             nav_simulator: 'Simulator',
-            footer_text: 'Powered by NASA and The Space Devs APIs.'
+            footer_text: 'Powered by NASA and The Space Devs APIs.',
+            section_other_projects: 'Explore Further',
+            other_projects_desc: 'Discover other amazing projects from our space lab.',
+            orrery_title: 'Simulator: Interactive Solar System Orrery',
+            orrery_desc: 'Navigate our Solar System, control time, view interactive orbital data of moons and gas giants with physics-based precision.',
+            orrery_btn: 'Open Orrery'
         },
         pt: {
             nav_home: 'Início',
@@ -63,7 +68,12 @@ const I18N = {
             card_satellite_ig: 'Página do Satélite (Instagram)',
             nav_random: 'Artigo Aleatório',
             nav_simulator: 'Simulador',
-            footer_text: 'Alimentado por APIs da NASA e The Space Devs.'
+            footer_text: 'Alimentado por APIs da NASA e The Space Devs.',
+            section_other_projects: 'Explore Também',
+            other_projects_desc: 'Conheça outros projetos incríveis do nosso laboratório espacial.',
+            orrery_title: 'Simulador: Sistema Solar Orrery Interativo',
+            orrery_desc: 'Navegue pelo nosso Sistema Solar, controle o tempo, visualize dados de luas orbitando gigantes gasosos de forma interativa e com precisão baseada em física.',
+            orrery_btn: 'Abrir Orrery'
         },
         es: { nav_home: "Inicio", nav_news: "Noticias", nav_launches: "Lanzamientos", nav_discoveries: "Descubrimientos", nav_live: "En Vivo", placeholder_search: "Buscar en el cosmos...", hero_label: "Imagen Astronómica del Día", hero_cta: "Explorar Noticias", section_live: "Misiones en Vivo y Telemetría", section_news: "Últimas Noticias de la NASA", section_launches: "Misiones de la NASA", section_discoveries: "Descubrimientos Científicos", card_read_more: "Leer Artículo", card_view_data: "Ver Datos", live_iss_title: "Estación Espacial Internacional", live_iss_desc: "Rastreo en tiempo real del laboratorio orbital de la humanidad.", live_telemetry: "TELEMETRÍA EN VIVO", live_streaming: "TRANSMISIÓN EN VIVO", live_artemis_title: "Artemis II", live_artemis_desc: "Rastreo de la misión de sobrevuelo lunar tripulada.", raw_feed_btn: "CÁMARA EN BRUTO", nav_satellites: "Satélites", section_satellites: "Satélites de la NASA en Órbita", card_satellite_ig: "Página del Satélite (Instagram)", nav_random: "Artículo Aleatorio", nav_simulator: "Simulador", footer_text: "Desarrollado con las API de la NASA y The Space Devs." },
         fr: { nav_home: "Accueil", nav_news: "Actualités", nav_launches: "Lancements", nav_discoveries: "Découvertes", nav_live: "En Direct", placeholder_search: "Chercher dans le cosmos...", hero_label: "Image Astronomique du Jour", hero_cta: "Explorer les Actualités", section_live: "Missions en Direct et Télémétrie", section_news: "Dernières Actualités de la NASA", section_launches: "Missions de la NASA", section_discoveries: "Découvertes Scientifiques", card_read_more: "Lire l'Article", card_view_data: "Voir les Données", live_iss_title: "Station Spatiale Internationale", live_iss_desc: "Suivi en temps réel du laboratoire orbital de l'humanité.", live_telemetry: "TÉLÉMÉTRIE EN DIRECT", live_streaming: "DIFFUSION EN DIRECT", live_artemis_title: "Artemis II", live_artemis_desc: "Suivi de la mission habitée de survol lunaire.", raw_feed_btn: "FLUX CAMÉRA BRUT", nav_satellites: "Satellites", section_satellites: "Satellites de la NASA en Orbite", card_satellite_ig: "Page du Satellite (Instagram)", nav_random: "Article Aléatoire", nav_simulator: "Simulateur", footer_text: "Propulsé par les API de la NASA et The Space Devs." },
