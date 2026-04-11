@@ -127,17 +127,59 @@ const ApiService = {
         }
     },
 
+
     /**
-     * Fetch Artemis specifically (Search by program/name)
+     * Fetch NASA Satellites Data (Mocked with Instagram links)
      */
-    async getArtemisData() {
+    async getNASASatellites() {
+        return [
+            {
+                name: "James Webb Space Telescope",
+                description: "Infrared space observatory launched to capture the oldest light in the universe.",
+                image: "https://images.nasa.gov/images/nasalogo.png",
+                instagram: "https://www.instagram.com/nasawebb",
+                orbit: "L2 Lagrange Point"
+            },
+            {
+                name: "Hubble Space Telescope",
+                description: "A large, space-based observatory, which has revolutionized astronomy.",
+                image: "https://images.nasa.gov/images/nasalogo.png",
+                instagram: "https://www.instagram.com/nasahubble",
+                orbit: "Low Earth Orbit"
+            },
+            {
+                name: "Landsat 9",
+                description: "An Earth observation satellite launched to monitor land surface changes.",
+                image: "https://images.nasa.gov/images/nasalogo.png",
+                instagram: "https://www.instagram.com/nasaearth",
+                orbit: "Sun-synchronous Orbit (LEO)"
+            },
+            {
+                name: "Chandra X-ray Observatory",
+                description: "Flagship-class space telescope designed to detect X-ray emission from very hot regions.",
+                image: "https://images.nasa.gov/images/nasalogo.png",
+                instagram: "https://www.instagram.com/nasachandraxray",
+                orbit: "High Earth Orbit"
+            }
+        ];
+    },
+
+    /**
+     * Fetch a completely random NASA-related news article
+     */
+    async getRandomNews() {
         try {
-            const response = await fetch(`${CONFIG.TSD_URL}/launch/?search=Artemis&limit=2`);
+            const randomOffset = Math.floor(Math.random() * 200);
+            const response = await fetch(`${CONFIG.SNAPI_URL}/articles/?limit=20&offset=${randomOffset}`);
             const data = await response.json();
-            return data.results;
+            const allowedAgencies = ['NASA', 'ESA', 'SpaceX', 'Spaceflight Now', 'SpaceNews'];
+            const filtered = data.results.filter(news => 
+                allowedAgencies.some(agency => news.news_site.includes(agency))
+            );
+            return filtered.length > 0 ? filtered[Math.floor(Math.random() * filtered.length)] : null;
         } catch (error) {
-            console.error('Error fetching Artemis data:', error);
-            return [];
+            console.error('Error fetching random news:', error);
+            return null;
         }
     }
 };

@@ -103,6 +103,28 @@ const UI = {
                     </div>
                 </div>
             `;
+        } else if (type === 'satellite') {
+            imageUrl = data.image || 'https://images.nasa.gov/images/nasalogo.png';
+            title = data.name;
+            summary = data.description;
+            sourceUrl = data.instagram;
+            const orbit = data.orbit;
+            
+            card.innerHTML = `
+                <div class="card-image-container">
+                    <img src="${imageUrl}" alt="${title}" class="card-image" loading="lazy" onerror="this.src='https://images.nasa.gov/images/nasalogo.png'">
+                </div>
+                <div class="card-content">
+                    <span class="card-label" style="color: #bc00ff;">Satellite • ${orbit}</span>
+                    <h3 class="card-title">${title}</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 2rem;">${summary}</p>
+                    <div class="card-footer">
+                        <a href="${sourceUrl}" target="_blank" class="btn btn-glass" style="width: 100%; text-align: center; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white; border: none;">
+                            <i data-lucide="instagram" style="width: 18px;"></i> <span data-i18n="card_satellite_ig">${dict.card_satellite_ig || 'Instagram'}</span>
+                        </a>
+                    </div>
+                </div>
+            `;
         }
 
         return card;
@@ -137,6 +159,7 @@ const UI = {
             container.innerHTML = `<div class="glass" style="padding: 2rem; text-align: center;">No NASA active missions detected.</div>`;
             return;
         }
+
 
         // 1. ISS Telemetry Card (Always Live)
         if (issData) {
